@@ -466,6 +466,6 @@ elab_rules : tactic |
   liftMetaFinishingTactic fun g => do
     let g ← falseOrByContra g
     g.withContext do
-      let hyps := (← getLocalHyps).toList
+      let hyps := (← getLocalHyps).toList.map (fun e => e.consumeTypeAnnotations)
       trace[omega] "analyzing {hyps.length} hypotheses:\n{← hyps.mapM inferType}"
       omega hyps g cfg
