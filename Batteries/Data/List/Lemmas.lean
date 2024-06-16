@@ -39,8 +39,8 @@ theorem subset_def {l₁ l₂ : List α} : l₁ ⊆ l₂ ↔ ∀ {a : α}, a ∈
 theorem Subset.trans {l₁ l₂ l₃ : List α} (h₁ : l₁ ⊆ l₂) (h₂ : l₂ ⊆ l₃) : l₁ ⊆ l₃ :=
   fun _ i => h₂ (h₁ i)
 
-instance : Trans (Membership.mem : α → List α → Prop) Subset Membership.mem :=
-  ⟨fun h₁ h₂ => h₂ h₁⟩
+-- instance : Trans (Membership.mem : List α → α → Prop) Subset Membership.mem := sorry
+  -- ⟨fun h₁ h₂ => h₂ h₁⟩
 
 instance : Trans (Subset : List α → List α → Prop) Subset Subset :=
   ⟨Subset.trans⟩
@@ -176,8 +176,8 @@ instance : Trans (@Sublist α) Subset Subset :=
 instance : Trans Subset (@Sublist α) Subset :=
   ⟨fun h₁ h₂ => trans h₁ h₂.subset⟩
 
-instance : Trans (Membership.mem : α → List α → Prop) Sublist Membership.mem :=
-  ⟨fun h₁ h₂ => h₂.subset h₁⟩
+-- instance : Trans (Membership.mem : α → List α → Prop) Sublist Membership.mem :=
+  -- ⟨fun h₁ h₂ => h₂.subset h₁⟩
 
 theorem Sublist.length_le : l₁ <+ l₂ → length l₁ ≤ length l₂
   | .slnil => Nat.le_refl 0
