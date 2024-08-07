@@ -226,12 +226,12 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
 @[env_linter] def simpWeakKeys : Linter where
   noErrorsFound := "No simp lemmas have weak keys."
   errorsFound := "Some simp lemmas have weak keys."
-  test := fun declName => do
+  test := fun declName => withReducible do
     unless ← isSimpTheorem declName do return none
     let info ← getConstInfo declName
     unless info.hasValue do return none
     let l ← preprocess (← mkSorry info.type true) info.type false true
-    let arr ← l.toArray.mapM fun (_, type) => withReducible do
+    let arr ← l.toArray.mapM fun (_, type) => do
       let (_, _, type) ← forallMetaTelescopeReducing type
       let type ← whnfR type
       let keys ←
