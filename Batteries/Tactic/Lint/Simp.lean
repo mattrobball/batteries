@@ -230,7 +230,7 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
     unless ← isSimpTheorem declName do return none
     let info ← getConstInfo declName
     unless info.hasValue do return none
-    let l ← preprocess info.value! info.type false true
+    let l ← preprocess (← mkSorry info.type true) info.type false true
     let arr ← l.toArray.mapM fun (_, type) => withReducible do
       let (_, _, type) ← forallMetaTelescopeReducing type
       let type ← whnfR type
@@ -239,7 +239,7 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
         | some (_, lhs, _) => pure (← DiscrTree.mkPath lhs simpDtConfig false)
         | none => throwError "unexpected kind of 'simp' theorem{indentExpr type}"
       let goodKeys := keys.filter (fun key => key != .star || key != .other)
-      if goodKeys.size ≤ 2 then
+      if goodKeys.size ≤ 2 && keys.size > 4 then
         return keys
       else
         return #[]
@@ -247,7 +247,7 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
       return none
     else
       let msgs ← arr.mapM (fun keys => DiscrTree.keysAsPattern keys)
-      return m!"{declName} has weak keys: {msgs}"
+      return m!"Declaration has weak keys: {msgs}"
 
 
 private def Expr.eqOrIff? : Expr → Option (Expr × Expr)
