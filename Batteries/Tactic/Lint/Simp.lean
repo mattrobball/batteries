@@ -219,6 +219,37 @@ Some simp lemmas have a variable as head symbol of the left-hand side (after whn
     unless headSym.isFVar do return none
     return m!"Left-hand side has variable as head symbol: {headSym}"
 
+open private preprocess from Lean.Meta.Tactic.Simp.SimpTheorems in
+/--
+A linter for simp theorems whose keys are weak, i.e. they contain few non stars and other symbols.
+-/
+@[env_linter] def simpWeakKeys : Linter where
+  noErrorsFound := "No simp lemmas have weak keys."
+  errorsFound := "Some simp lemmas have weak keys."
+  test := fun declName => do
+    unless ← isSimpTheorem declName do return none
+    let info ← getConstInfo declName
+    unless info.hasValue do return none
+    let l ← preprocess info.value! info.type false true
+    let arr ← l.toArray.mapM fun (_, type) => withReducible do
+      let (_, _, type) ← forallMetaTelescopeReducing type
+      let type ← whnfR type
+      let keys ←
+        match type.eq? with
+        | some (_, lhs, _) => pure (← DiscrTree.mkPath lhs simpDtConfig false)
+        | none => throwError "unexpected kind of 'simp' theorem{indentExpr type}"
+      let goodKeys := keys.filter (fun key => key != .star || key != .other)
+      if goodKeys.size ≤ 2 then
+        return keys
+      else
+        return #[]
+    if arr.flatten.isEmpty then
+      return none
+    else
+      let msgs ← arr.mapM (fun keys => DiscrTree.keysAsPattern keys)
+      return m!"{declName} has weak keys: {msgs}"
+
+
 private def Expr.eqOrIff? : Expr → Option (Expr × Expr)
   | .app (.app (.app (.const ``Eq _) _) lhs) rhs
   | .app (.app (.const ``Iff _) lhs) rhs
