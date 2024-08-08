@@ -219,11 +219,12 @@ Some simp lemmas have a variable as head symbol of the left-hand side (after whn
     unless headSym.isFVar do return none
     return m!"Left-hand side has variable as head symbol: {headSym}"
 
+open DiscrTree in
 open private preprocess from Lean.Meta.Tactic.Simp.SimpTheorems in
 /--
 A linter for simp theorems whose keys are weak, i.e. they contain few non stars and other symbols.
 -/
-@[env_linter] def simpWeakKeys : Linter where
+@[env_linter] def simpKeys : Linter where
   noErrorsFound := "No simp lemmas have weak keys."
   errorsFound := "Some simp lemmas have weak keys."
   test := fun declName => withReducible do
@@ -238,8 +239,16 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
         match type.eq? with
         | some (_, lhs, _) => pure (← DiscrTree.mkPath lhs simpDtConfig false)
         | none => throwError "unexpected kind of 'simp' theorem{indentExpr type}"
-      let goodKeys := keys.filter (fun key => key != .star && key != .other)
-      if goodKeys.size ≤ 2 then
+      let common :=
+        #[`HAdd.hAdd, `HMul.hMul, `HSMul.hSMul, `HSub.hSub, `HDiv.hDiv,
+          `Neg.neg, `Inv.inv, `Zero.zero, `One.one, `Top.top, `Bot.bot,
+          `Quotient.mk, `Quotient.mk', `Quotient.mk'', `Eq, `Membership.mem, `DFunLike.coe]
+      let goodKeyWeight : Key → Nat
+        | .star => 0
+        | .other => 0
+        | .const n _ => if common.contains n then 0 else 2
+        | _ => 1
+      if keys.foldl (init := 0) (fun w k => w + goodKeyWeight k) ≤ 1 then
         return keys
       else
         return #[]
