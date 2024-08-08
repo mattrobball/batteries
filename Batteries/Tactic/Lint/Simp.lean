@@ -243,12 +243,10 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
         #[`HAdd.hAdd, `HMul.hMul, `HSMul.hSMul, `HSub.hSub, `HDiv.hDiv,
           `Neg.neg, `Inv.inv, `Zero.zero, `One.one, `Top.top, `Bot.bot,
           `Quotient.mk, `Quotient.mk', `Quotient.mk'', `Eq, `Membership.mem, `DFunLike.coe]
-      let goodKeyWeight : Key → Nat
-        | .star => 0
-        | .other => 0
-        | .const n _ => if common.contains n then 0 else 2
-        | _ => 1
-      if keys.foldl (init := 0) (fun w k => w + goodKeyWeight k) ≤ 1 then
+      let isCommonName (key : Key) : Bool :=
+        if let .const n _ := key then common.contains n else false
+      let goodKeys := keys.filter (fun key => key != .star && key != .other && !isCommonName key)
+      if goodKeys.isEmpty then
         return keys
       else
         return #[]
