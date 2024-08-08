@@ -238,7 +238,7 @@ A linter for simp theorems whose keys are weak, i.e. they contain few non stars 
         match type.eq? with
         | some (_, lhs, _) => pure (← DiscrTree.mkPath lhs simpDtConfig false)
         | none => throwError "unexpected kind of 'simp' theorem{indentExpr type}"
-      let goodKeys := keys.filter (fun key => key != .star || key != .other)
+      let goodKeys := keys.filter (fun key => key != .star && key != .other)
       if goodKeys.size ≤ 2 then
         return keys
       else
