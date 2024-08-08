@@ -24,8 +24,7 @@ Checks whether instances have weak keys, which are most `.star`'s and `.other`'s
     let info ← getConstInfo declName
     let (_, _, type) ← forallMetaTelescopeReducing info.type
     let keys ← mkPath type tcDtConfig
-    return some m!"{info.type} has keys: {keys}"
-    -- if (keys.filter (fun key => !key == .star && !key == .other) |>.size) ≤ 2 then
-    --   return some m!"has weak keys: {keys}"
-    -- else
-    --   return none
+    if (keys.filter (fun key => !key == .star && !key == .other) |>.size) ≤ 2 then
+      return some m!"has weak keys: {keys}"
+    else
+      return none
