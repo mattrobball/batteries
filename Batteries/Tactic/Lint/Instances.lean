@@ -23,7 +23,7 @@ Checks whether instances have weak keys, which are most `.star`'s and `.other`'s
     unless ← isInstance declName do return none
     let info ← getConstInfo declName
     let keys ← mkInstanceKey info.type
-    if (keys.filter (fun key => !key == .star && !key == .other) |>.size) ≤ 2 && keys.size ≥ 4 then
+    if (keys.filter (fun key => !key == .star && !key == .other) |>.size) ≤ 2 then
       return some m!"has weak keys: {keys}"
     else
       return none
