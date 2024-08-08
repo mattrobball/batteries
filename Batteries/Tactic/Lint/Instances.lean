@@ -22,8 +22,9 @@ Checks whether instances have weak keys, which are most `.star`'s and `.other`'s
   test := fun declName => withReducible do
     unless ← isInstance declName do return none
     let info ← getConstInfo declName
-    let keys ← mkInstanceKey info.type
-    return some m!"{info.type} has weak keys: {keys}"
+    let (_, _, type) ← forallMetaTelescopeReducing info.type
+    let keys ← mkPath type tcDtConfig
+    return some m!"{info.type} has keys: {keys}"
     -- if (keys.filter (fun key => !key == .star && !key == .other) |>.size) ≤ 2 then
     --   return some m!"has weak keys: {keys}"
     -- else
